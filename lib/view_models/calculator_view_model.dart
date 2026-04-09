@@ -1,71 +1,83 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_kalkulator/models/calculator_model.dart';
 
 class CalculatorViewModel with ChangeNotifier {
-  double a = 0;
-  double b = 0;
-  double result = 0;
+  List<num> numbers = [0];
+  List<String> operations = [];
+  double? result;
   String tempDisplay = "0";
-
-  List<CalculatorModel> button = [
-    CalculatorModel(symbol: "AC", operator: 'clear'),
-    CalculatorModel(symbol: "±", operator: 'plus-min'),
-    CalculatorModel(symbol: "%", operator: 'percent'),
-    CalculatorModel(symbol: "÷", operator: 'division'),
-    CalculatorModel(symbol: "7", operator: 'number'),
-    CalculatorModel(symbol: "8", operator: 'number'),
-    CalculatorModel(symbol: "9", operator: 'number'),
-    CalculatorModel(symbol: "\u00d7", operator: 'multiplication'),
-    CalculatorModel(symbol: "4", operator: 'number'),
-    CalculatorModel(symbol: "5", operator: 'number'),
-    CalculatorModel(symbol: "6", operator: 'number'),
-    CalculatorModel(symbol: "-", operator: 'subtraction'),
-    CalculatorModel(symbol: "1", operator: 'number'),
-    CalculatorModel(symbol: "2", operator: 'number'),
-    CalculatorModel(symbol: "3", operator: 'number'),
-    CalculatorModel(symbol: "+", operator: 'summation'),
-    CalculatorModel(symbol: "\u27f3", operator: 'restart'),
-    CalculatorModel(symbol: "0", operator: 'number'),
-    CalculatorModel(symbol: ".", operator: 'comma'),
-    CalculatorModel(symbol: "=", operator: 'results'),
-  ];
+  double? a; // Stores the first operand
+  double? b; // Stores the second operand
+  String? currentOperation; // Stores the current operation
 
   changeDisplay(String number) {
-    if (double.tryParse(tempDisplay) == 0) {
+    if (tempDisplay == "0") {
       tempDisplay = number;
     } else {
-      tempDisplay = tempDisplay + number;
+      tempDisplay += number;
     }
     notifyListeners();
   }
 
   clear() {
     tempDisplay = "0";
+    a = null;
+    b = null;
+    result = null;
+    currentOperation = null;
     notifyListeners();
   }
 
-  plusMinus() {
-    if (double.tryParse(tempDisplay)! > 0) {
-      tempDisplay = "-" + tempDisplay;
+  remove() {
+    if (tempDisplay.length > 1) {
+      tempDisplay = tempDisplay.substring(0, tempDisplay.length - 1);
     } else {
-      tempDisplay = tempDisplay.replaceFirst(RegExp(r'-'), '');
+      tempDisplay = "0";
     }
     notifyListeners();
   }
 
-  multiplication() {
-    a = double.tryParse(tempDisplay)!;
-
-    result = a * b;
-    print(result);
+  plusMinus() {
+    if (tempDisplay.startsWith("-")) {
+      tempDisplay = tempDisplay.substring(1);
+    } else {
+      tempDisplay = "-" + tempDisplay;
+    }
     notifyListeners();
   }
 
-  division() {
-    a = double.tryParse(tempDisplay)!;
+  percentage() {
+    double value = double.tryParse(tempDisplay) ?? 0;
+    tempDisplay = (value / 100).toString();
+    notifyListeners();
+  }
 
-    result = a / b;
-    print(result);
+  performOperation() {
+    if (a != null && currentOperation != null) {
+      b = double.tryParse(tempDisplay);
+      if (currentOperation == "*") {
+        result = a! * b!;
+      } else if (currentOperation == "/") {
+        result = a! / b!;
+      } else if (currentOperation == "+") {
+        result = a! + b!;
+      } else if (currentOperation == "-") {
+        result = a! - b!;
+      }
+      tempDisplay = result.toString();
+      a = result;
+      b = null;
+      currentOperation = null;
+    }
+  }
+
+  setOperation(String operation) {
+    if (a == null) {
+      a = double.tryParse(tempDisplay);
+    } else {
+      performOperation();
+    }
+    currentOperation = operation;
+    tempDisplay = "0"; // Prepare display for the next number
     notifyListeners();
   }
 
@@ -74,13 +86,23 @@ class CalculatorViewModel with ChangeNotifier {
       changeDisplay(symbol);
     } else if (operator == "clear") {
       clear();
+    } else if (operator == "remove") {
+      remove();
     } else if (operator == "plus-min") {
-      print('objectff');
       plusMinus();
+    } else if (operator == "percent") {
+      percentage();
     } else if (operator == "multiplication") {
-      multiplication();
+      setOperation("*");
     } else if (operator == "division") {
-      division();
-    } else {}
+      setOperation("/");
+    } else if (operator == "summation") {
+      setOperation("+");
+    } else if (operator == "subtraction") {
+      setOperation("-");
+    } else if (operator == "results") {
+      performOperation();
+      notifyListeners();
+    }
   }
 }

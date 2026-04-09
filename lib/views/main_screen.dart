@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_kalkulator/models/button_model.dart';
 import 'package:flutter_kalkulator/view_models/calculator_view_model.dart';
 import 'package:provider/provider.dart';
 
@@ -19,40 +20,54 @@ class _MainScreenState extends State<MainScreen> {
           crossAxisAlignment: CrossAxisAlignment.end,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              height: 40,
-              color: Colors.blue,
+            Spacer(),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 28),
+              child: Text(
+                calculator.tempDisplay,
+                textAlign: TextAlign.end,
+                style: const TextStyle(
+                  fontSize: 24,
+                  color: Colors.grey,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ),
-            Expanded(
-                child: Text(
-              "99",
-              style: TextStyle(),
-            )),
-            Text(calculator.tempDisplay, textAlign: TextAlign.end),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 28),
+              child: Text(
+                calculator.result != null ? calculator.result.toString() : "0",
+                textAlign: TextAlign.end,
+                style: const TextStyle(
+                  fontSize: 40,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
             GridView.builder(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 shrinkWrap: true,
-                itemCount: calculator.button.length,
+                itemCount: buttons.length,
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 4,
                 ),
                 itemBuilder: (ctx, i) {
-                  return InkWell(
+                  return GestureDetector(
                     onTap: () {
-                      calculator.decisionMaking(calculator.button[i].operator,
-                          calculator.button[i].symbol);
+                      calculator.decisionMaking(
+                          buttons[i].operator, buttons[i].symbol);
                     },
                     child: Container(
                       margin: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
-                        color: Colors.grey,
+                        color: Colors.grey[200],
                       ),
                       height: 10,
                       width: 10,
                       child: Center(
                         child: Text(
-                          calculator.button[i].symbol,
+                          buttons[i].symbol,
                           style: const TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
